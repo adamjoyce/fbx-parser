@@ -28,11 +28,23 @@ def display(node, indent):
         display(child, indent + "  ")
 
 def get_vertices(node):
+    if not node: return
 
+    for i in range(node.GetChildCount()):
+        print("Break")
+        child = node.GetChild(i)
+        attr_type = child.GetNodeAttribute().GetAttributeType()
+
+        if attr_type == FbxCommon.FbxNodeAttribute.eMesh:
+            vertices = child.GetMesh().GetControlPoints()
+
+            for i in range(len(vertices)):
+                print(vertices[i])
 
 sdk_manager, scene = FbxCommon.InitializeSdkObjects()
 
 if not FbxCommon.LoadScene(sdk_manager, scene, "cube.fbx"):
     print("Error in LoadScene")
 
-display(scene.GetRootNode(), "")
+#display(scene.GetRootNode(), "")
+get_vertices(scene.GetRootNode())

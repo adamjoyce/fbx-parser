@@ -26,6 +26,7 @@ def display(node, indent):
             
         display(child, indent + "  ")
 '''
+
 def generate_svg(fbx_path):
     sdk_manager, scene = FbxCommon.InitializeSdkObjects()
 
@@ -39,16 +40,21 @@ def generate_svg(fbx_path):
         mesh = child.GetMesh()
 
         edges = get_edges(mesh)
-        edges = get_control_points(mesh, edges)
+        #print(edges)
+        edge_control_points = get_control_points(mesh, edges)
+        print(edge_control_points)
+        print("\n")
 
-        smallest_control_points = get_smallest_control_points(edges)
+        smallest_control_points = get_smallest_control_points(edge_control_points)
+        print(smallest_control_points)
+        print("\n")
 
     svg_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     svg_content += "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"360\">\n"
     svg_content += "<g fill=\"none\" stroke=\"#000\" stroke-width=\"3\">\n"
-    svg_content += generate_svg_path(edges) + "\n"
+    svg_content += generate_svg_path(edge_control_points, smallest_control_points) + "\n"
     svg_content += "</g>\n" + "</svg>"
-    print(svg_content)
+    #print(svg_content)
 
     svg_file = open("box_wire.svg", "w")
     svg_file.write(svg_content)
@@ -60,7 +66,6 @@ def get_edges(mesh):
     for j in range(mesh.GetMeshEdgeCount()):
         edges.append(mesh.GetMeshEdgeVertices(j))
 
-    print edges
     return edges
 
 def get_control_points(mesh, edges):
@@ -74,7 +79,6 @@ def get_control_points(mesh, edges):
 
         control_points.append(temp)
     
-    print control_points
     return control_points
 
 def get_smallest_control_points(control_points):
@@ -93,15 +97,16 @@ def get_smallest_control_points(control_points):
                 smallest_z = control_points[i][j][2]
 
     smallest_control_points = [smallest_x, smallest_y, smallest_z]
-    print smallest_control_points
     return smallest_control_points
 
-def generate_svg_path(control_points):
+def generate_svg_path(control_points, smallest_control_points):
+    offset = 100
+
     svg_path = "<path d=\""
 
     for i in range(len(control_points)):
-        temp = "M" + str(control_points[i][0][0] + 200) + "," + str(control_points[i][0][1] + 200) + " "
-        temp += "L" + str(control_points[i][1][0] + 200) + "," + str(control_points[i][1][1] + 200) + " "
+        temp = "M" + str(control_points[i][0][0] - smallest_control_points[0] + offset) + "," + str(control_points[i][0][1] - smallest_control_points[1] + offset) + " "
+        temp += "L" + str(control_points[i][1][0] - smallest_control_points[0] + offset) + "," + str(control_points[i][1][1] - smallest_control_points[1] + offset) + " "
 
         svg_path += temp
 

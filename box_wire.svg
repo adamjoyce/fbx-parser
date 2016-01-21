@@ -28,6 +28,7 @@ function init(evt)
 	{
 		svgDocument = evt.target.ownerDocument;
 	}
+	set_viewport();
 	draw_object();
 }
 
@@ -43,6 +44,55 @@ function draw_object()
 		}
 		d += ' Z';
 		face.setAttributeNS(null, 'd', d);
+	}
+}
+
+function set_viewport()
+{
+	min_x = 0;
+	max_x = 0;
+	min_y = 0;
+	max_y = 0;
+
+	for(var i = 0; i < x_coordinates.length; i++)
+	{
+		if(min_x > x_coordinates[i])
+			min_x = x_coordinates[i];
+		if(max_x < x_coordinates[i])
+			max_x = x_coordinates[i];
+		if(min_y > y_coordinates[i])
+			min_y = y_coordinates[i];
+		if(max_y < y_coordinates[i])
+			max_y = y_coordinates[i];
+	}
+
+	view_port = document.getElementsByTagName('svg')[0];
+	view_port.setAttribute('viewBox', min_x + ' ' + min_y + ' ' + (max_x - min_x) + ' ' + (max_y - min_y));
+}
+
+function rotate_round_x(radians)
+{
+	for(var i = 0; i < x_coordinates.length; i++)
+	{
+		y = y_coordinates[i] - centre_y;
+		z = z_coordinates[i] - centre_z;
+		d = Math.sqrt(y * y + z * z);
+		theta = Math.atan2(y, z) + radians;
+		 y_coordinates[i] = centre_y + d * Math.sin(theta);
+		z_coordinates[i] = centre_z + d + Math.cos(theta);
+	}
+}
+
+function rotate_round_y(radians)
+{
+	for(var i = 0; i < y_coordinates.length; i++)
+	{
+		x = x_coordinates[i] - centre_x;
+		z = z_coordinates[i] - centre_z;
+		d = Math.sqrt(x * x + z * z);
+		theta = Math.atan2(x, z) + radians;
+		 x_coordinates[i] = centre_x + d * Math.sin(theta);
+		z_coordinates[i] = centre_z + d + Math.cos(theta);
 	}
 }
 

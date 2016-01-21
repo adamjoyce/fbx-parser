@@ -41,7 +41,8 @@ def generate_svg(fbx_path):
         mesh = child.GetMesh()
 
         svg_content += write_edges(mesh)
-        #svg_content += write_faces(mesh)
+        svg_content += write_faces(mesh)
+        svg_content += write_depth(mesh)
         
         control_points = mesh.GetControlPoints()
         smallest_control_points = find_smallest_control_points(control_points)
@@ -51,17 +52,11 @@ def generate_svg(fbx_path):
 
         svg_content += write_functions()
 
-        #edges = get_edges(mesh)
-        #print(edges)
-        #edge_control_points = get_control_points(mesh, edges)
-        #print(edge_control_points)
-        #print("\n")
-
-        #smallest_control_points = get_smallest_control_points(edge_control_points)
-        #print(smallest_control_points)
-        #print("\n")
-
     svg_content += "]]>\n</script>\n"
+
+    for i in range (child.GetMesh().GetPolygonCount()):
+        svg_content += "\n<path stroke='black' fill='blue' id='face-" + str(i) + "' d=''/>"
+
     svg_content += "</svg>"
     
     svg_file = open("box_wire.svg", "w")
@@ -88,13 +83,25 @@ def write_edges(mesh):
 
 def write_faces(mesh):
     faces = "faces = ["
-    #for i in range(mesh.GetPolygonCount()):
+    for i in range(mesh.GetPolygonCount()):
+        faces += "["
+        for j in range(mesh.GetPolygonSize(i)):
+            faces += str(mesh.GetPolygonVertex(i, j)) + ","
+        faces = faces[:-1] + "],"
+    faces = faces[:-1] + "]\n"
+    return faces
 
+def write_depth(mesh):
+    depth = "depth = ["
+    for i in range(mesh.GetPolygonCount()):
+        depth += "0,"
+    depth = depth[:-1] + "]\n\n"
+    return depth
 
 def write_coordinates(control_points, smallest_control_points):
-    x_coordinates = "x coordinates = ["
-    y_coordinates = "y coordinates = ["
-    z_coordinates = "z coordinates = ["
+    x_coordinates = "x_coordinates = ["
+    y_coordinates = "y_coordinates = ["
+    z_coordinates = "z_coordinates = ["
 
     for i in range(len(control_points)):
         x_coordinates += str(control_points[i][0] - smallest_control_points[0]) + ","
@@ -132,7 +139,8 @@ def write_centres(smallest_control_points):
 def write_functions():
     init_function = "function init(evt)\n{\n\tif(window.svgDocument == null)\n\t{\n\t\tsvgDocument = evt.target.ownerDocument;\n\t}\n\tdraw_object();\n}\n\n"
 
-    draw_object = "function draw_object()\n{\n\t"
+    draw_object = "function draw_object()\n{\n\tfor(var i = 0; i < faces.length; i++)\n\t{\n\t\tface = svgDocument.getElementById('face-'+i);\n\t\tvar d = 'M' + x_coordinates[faces[i][0]] + ' ' + y_coordinates[faces[i][0]];\n\t\tfor(var j = 1; j < faces[i].length; j++)\n\t\t{\n\t\t\td += ' ' + 'L' + x_coordinates[faces[i][j]] + ' ' + y_coordinates[faces[i][j]];\n\t\t}\n\t\td += ' Z';\n\t\tface.setAttributeNS(null, 'd', d);\n\t}\n}\n\n"
+
     return init_function + draw_object
 
 generate_svg("cube.fbx")

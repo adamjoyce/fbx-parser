@@ -28,6 +28,9 @@ function init(evt)
 	{
 		svgDocument = evt.target.ownerDocument;
 	}
+
+	rotate_round_x(0.78);
+	rotate_round_y(0.78);
 	set_viewport();
 	draw_object();
 }
@@ -78,8 +81,8 @@ function rotate_round_x(radians)
 		z = z_coordinates[i] - centre_z;
 		d = Math.sqrt(y * y + z * z);
 		theta = Math.atan2(y, z) + radians;
-		 y_coordinates[i] = centre_y + d * Math.sin(theta);
-		z_coordinates[i] = centre_z + d + Math.cos(theta);
+		y_coordinates[i] = centre_y + d * Math.sin(theta);
+		z_coordinates[i] = centre_z + d * Math.cos(theta);
 	}
 }
 
@@ -91,8 +94,8 @@ function rotate_round_y(radians)
 		z = z_coordinates[i] - centre_z;
 		d = Math.sqrt(x * x + z * z);
 		theta = Math.atan2(x, z) + radians;
-		 x_coordinates[i] = centre_x + d * Math.sin(theta);
-		z_coordinates[i] = centre_z + d + Math.cos(theta);
+		x_coordinates[i] = centre_x + d * Math.sin(theta);
+		z_coordinates[i] = centre_z + d * Math.cos(theta);
 	}
 }
 

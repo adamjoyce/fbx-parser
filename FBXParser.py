@@ -137,15 +137,15 @@ def write_centres(smallest_control_points):
     return centre_x + centre_y + centre_z
 
 def write_functions():
-    init_function = "function init(evt)\n{\n\tif(window.svgDocument == null)\n\t{\n\t\tsvgDocument = evt.target.ownerDocument;\n\t}\n\tset_viewport();\n\tdraw_object();\n}\n\n"
+    init_function = "function init(evt)\n{\n\tif(window.svgDocument == null)\n\t{\n\t\tsvgDocument = evt.target.ownerDocument;\n\t}\n\n\trotate_round_x(0.78);\n\trotate_round_y(0.78);\n\tset_viewport();\n\tdraw_object();\n}\n\n"
 
     draw_object = "function draw_object()\n{\n\tfor(var i = 0; i < faces.length; i++)\n\t{\n\t\tface = svgDocument.getElementById('face-'+i);\n\t\tvar d = 'M' + x_coordinates[faces[i][0]] + ' ' + y_coordinates[faces[i][0]];\n\t\tfor(var j = 1; j < faces[i].length; j++)\n\t\t{\n\t\t\td += ' ' + 'L' + x_coordinates[faces[i][j]] + ' ' + y_coordinates[faces[i][j]];\n\t\t}\n\t\td += ' Z';\n\t\tface.setAttributeNS(null, 'd', d);\n\t}\n}\n\n"
 
     set_viewport = "function set_viewport()\n{\n\tmin_x = 0;\n\tmax_x = 0;\n\tmin_y = 0;\n\tmax_y = 0;\n\n\tfor(var i = 0; i < x_coordinates.length; i++)\n\t{\n\t\tif(min_x > x_coordinates[i])\n\t\t\tmin_x = x_coordinates[i];\n\t\tif(max_x < x_coordinates[i])\n\t\t\tmax_x = x_coordinates[i];\n\t\tif(min_y > y_coordinates[i])\n\t\t\tmin_y = y_coordinates[i];\n\t\tif(max_y < y_coordinates[i])\n\t\t\tmax_y = y_coordinates[i];\n\t}\n\n\tview_port = document.getElementsByTagName('svg')[0];\n\tview_port.setAttribute('viewBox', min_x + ' ' + min_y + ' ' + (max_x - min_x) + ' ' + (max_y - min_y));\n}\n\n"
 
-    rotate_round_x = "function rotate_round_x(radians)\n{\n\tfor(var i = 0; i < x_coordinates.length; i++)\n\t{\n\t\ty = y_coordinates[i] - centre_y;\n\t\tz = z_coordinates[i] - centre_z;\n\t\td = Math.sqrt(y * y + z * z);\n\t\ttheta = Math.atan2(y, z) + radians;\n\t\ty_coordinates[i] = centre_y + d * Math.sin(theta);\n\t\tz_coordinates[i] = centre_z + d + Math.cos(theta);\n\t}\n}\n\n"
+    rotate_round_x = "function rotate_round_x(radians)\n{\n\tfor(var i = 0; i < x_coordinates.length; i++)\n\t{\n\t\ty = y_coordinates[i] - centre_y;\n\t\tz = z_coordinates[i] - centre_z;\n\t\td = Math.sqrt(y * y + z * z);\n\t\ttheta = Math.atan2(y, z) + radians;\n\t\ty_coordinates[i] = centre_y + d * Math.sin(theta);\n\t\tz_coordinates[i] = centre_z + d * Math.cos(theta);\n\t}\n}\n\n"
 
-    rotate_round_y = "function rotate_round_y(radians)\n{\n\tfor(var i = 0; i < y_coordinates.length; i++)\n\t{\n\t\tx = x_coordinates[i] - centre_x;\n\t\tz = z_coordinates[i] - centre_z;\n\t\td = Math.sqrt(x * x + z * z);\n\t\ttheta = Math.atan2(x, z) + radians;\n\t\tx_coordinates[i] = centre_x + d * Math.sin(theta);\n\t\tz_coordinates[i] = centre_z + d + Math.cos(theta);\n\t}\n}\n\n"
+    rotate_round_y = "function rotate_round_y(radians)\n{\n\tfor(var i = 0; i < y_coordinates.length; i++)\n\t{\n\t\tx = x_coordinates[i] - centre_x;\n\t\tz = z_coordinates[i] - centre_z;\n\t\td = Math.sqrt(x * x + z * z);\n\t\ttheta = Math.atan2(x, z) + radians;\n\t\tx_coordinates[i] = centre_x + d * Math.sin(theta);\n\t\tz_coordinates[i] = centre_z + d * Math.cos(theta);\n\t}\n}\n\n"
 
     return init_function + draw_object + set_viewport + rotate_round_x + rotate_round_y
 

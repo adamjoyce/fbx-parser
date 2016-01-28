@@ -8,9 +8,11 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         s.send_response(200)
         s.send_header("Content-type", "text/html")
         s.end_headers()
-        s.wfile.write("<html><head><title>Title goes here.</title></head>")
-        s.wfile.write("<body><p>test</p></body>")
-        s.wfile.write("<p>You accessed path: %s</p>" % s.path)
+        s.wfile.write("<html><head><title>FBX Parser</title></head>")
+        s.wfile.write("<body>")
+
+        for dirname,dirnames
+
         s.wfile.write("</body></html>")
 '''
 def display(node, indent):
@@ -157,6 +159,9 @@ def write_paths(mesh):
         paths += "\n<path fill='#00" + format(start_colour, 'x') + "' id='face-" + str(i) + "' d=''/>"
         start_colour += 1
     return paths
+
+httpd = BaseHTTPServer.HttpServer(("localhost", 8000), MyHandler)
+httpd.serve_forever()
 
 #generate_svg("cube.fbx")
 generate_svg("teapot.fbx")

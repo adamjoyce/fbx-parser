@@ -22,7 +22,7 @@ function init(evt)
 	}
 
 	rotate_round_x(-1.57);
-	rotate_round_y(-1);
+	rotate_round_y(-0.7);
 
 	determine_depth()
 	draw_object();

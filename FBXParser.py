@@ -54,10 +54,9 @@ def generate_svg(fbx_path):
 
     svg_content += "]]>\n</script>\n"
 
-    for i in range (child.GetMesh().GetPolygonCount()):
-        svg_content += "\n<path stroke='black' fill='blue' id='face-" + str(i) + "' d=''/>"
+    svg_content += write_paths(mesh)
 
-    svg_content += "</svg>"
+    svg_content += "\n</svg>"
     
     svg_file = open("box_wire.svg", "w")
     svg_file.write(svg_content)
@@ -66,7 +65,7 @@ def generate_svg(fbx_path):
 def write_meta_data():
     svg_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     svg_content += "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" onload=\"init(evt)\">\n"
-    svg_content += "<style>\n.edge{\nfill: white;\nstroke: black;\nstroke-width: 1;\n}\n</style>\n\n"
+    #svg_content += "<style>\n.edge{\nfill: white;\nstroke: black;\nstroke-width: 1;\n}\n</style>\n\n"
     svg_content += "<script type=\"text/ecmascript\">\n"
     svg_content += "<![CDATA[\n"
     return svg_content
@@ -137,9 +136,9 @@ def write_centres(smallest_control_points):
     return centre_x + centre_y + centre_z
 
 def write_functions():
-    init_function = "function init(evt)\n{\n\tif(window.svgDocument == null)\n\t{\n\t\tsvgDocument = evt.target.ownerDocument;\n\t}\n\n\trotate_round_x(0.78);\n\trotate_round_y(0.78);\n\tset_viewport();\n\tdraw_object();\n}\n\n"
+    init_function = "function init(evt)\n{\n\tif(window.svgDocument == null)\n\t{\n\t\tsvgDocument = evt.target.ownerDocument;\n\t}\n\n\trotate_round_x(0.78);\n\trotate_round_y(0.78);\n\n\tdetermine_depth()\n\tdraw_object();\n\tset_viewport();\n}\n\n"
 
-    draw_object = "function draw_object()\n{\n\tfor(var i = 0; i < faces.length; i++)\n\t{\n\t\tface = svgDocument.getElementById('face-'+i);\n\t\tvar d = 'M' + x_coordinates[faces[i][0]] + ' ' + y_coordinates[faces[i][0]];\n\t\tfor(var j = 1; j < faces[i].length; j++)\n\t\t{\n\t\t\td += ' ' + 'L' + x_coordinates[faces[i][j]] + ' ' + y_coordinates[faces[i][j]];\n\t\t}\n\t\td += ' Z';\n\t\tface.setAttributeNS(null, 'd', d);\n\t}\n}\n\n"
+    draw_object = "function draw_object()\n{\n\tfor(var i = 0; i < faces.length; i++)\n\t{\n\t\tface = svgDocument.getElementById('face-'+i);\n\t\tvar d = 'M' + x_coordinates[faces[depth[i]][0]] + ' ' + y_coordinates[faces[depth[i]][0]];\n\t\tfor(var j = 1; j < faces[depth[i]].length; j++)\n\t\t{\n\t\t\td += ' ' + 'L' + x_coordinates[faces[depth[i]][j]] + ' ' + y_coordinates[faces[depth[i]][j]];\n\t\t}\n\t\td += ' Z';\n\t\tface.setAttributeNS(null, 'd', d);\n\t}\n}\n\n"
 
     set_viewport = "function set_viewport()\n{\n\tmin_x = 0;\n\tmax_x = 0;\n\tmin_y = 0;\n\tmax_y = 0;\n\n\tfor(var i = 0; i < x_coordinates.length; i++)\n\t{\n\t\tif(min_x > x_coordinates[i])\n\t\t\tmin_x = x_coordinates[i];\n\t\tif(max_x < x_coordinates[i])\n\t\t\tmax_x = x_coordinates[i];\n\t\tif(min_y > y_coordinates[i])\n\t\t\tmin_y = y_coordinates[i];\n\t\tif(max_y < y_coordinates[i])\n\t\t\tmax_y = y_coordinates[i];\n\t}\n\n\tview_port = document.getElementsByTagName('svg')[0];\n\tview_port.setAttribute('viewBox', min_x + ' ' + min_y + ' ' + (max_x - min_x) + ' ' + (max_y - min_y));\n}\n\n"
 
@@ -147,6 +146,17 @@ def write_functions():
 
     rotate_round_y = "function rotate_round_y(radians)\n{\n\tfor(var i = 0; i < y_coordinates.length; i++)\n\t{\n\t\tx = x_coordinates[i] - centre_x;\n\t\tz = z_coordinates[i] - centre_z;\n\t\td = Math.sqrt(x * x + z * z);\n\t\ttheta = Math.atan2(x, z) + radians;\n\t\tx_coordinates[i] = centre_x + d * Math.sin(theta);\n\t\tz_coordinates[i] = centre_z + d * Math.cos(theta);\n\t}\n}\n\n"
 
-    return init_function + draw_object + set_viewport + rotate_round_x + rotate_round_y
+    determine_depth = "function determine_depth()\n{\n\tvar faces_depth = Array(faces.length);\n\tfor(var i = 0; i < faces.length; i++)\n\t{\n\t\tvar depth_value = 0;\n\t\tfor(var j = 0; j < faces[i].length; j++)\n\t\t{\n\t\t\tdepth_value += z_coordinates[faces[i][j]];\n\t\t}\n\t\tdepth_value /= faces[i].length;\n\t\tfaces_depth[i] = depth_value;\n\t}\n\n\tfor(var i = 0; i < depth.length; i++)\n\t{\n\t\tvar closest_face = -1;\n\t\tfor(var j = 0; j < faces_depth.length; j++)\n\t\t{\n\t\t\tif(faces_depth[j] != null && (closest_face == -1 || faces_depth[closest_face] > faces_depth[j]))\n\t\t\t\tclosest_face = j;\n\t\t}\n\t\tdepth[i] = closest_face;\n\t\tfaces_depth[closest_face] = null;\n\t}\n}\n\n"
 
-generate_svg("cube.fbx")
+    return init_function + draw_object + set_viewport + rotate_round_x + rotate_round_y + determine_depth
+
+def write_paths(mesh):
+    paths = ""
+    start_colour = 0x002BFF
+    for i in range(mesh.GetPolygonCount()):
+        paths += "\n<path fill='#00" + format(start_colour, 'x') + "' id='face-" + str(i) + "' d=''/>"
+        start_colour += 1
+    return paths
+
+#generate_svg("cube.fbx")
+generate_svg("teapot.fbx")

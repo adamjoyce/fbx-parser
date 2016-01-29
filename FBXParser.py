@@ -1,4 +1,5 @@
 import time
+import os
 import BaseHTTPServer
 import FbxCommon
 
@@ -11,7 +12,10 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         s.wfile.write("<html><head><title>FBX Parser</title></head>")
         s.wfile.write("<body>")
 
-        for dirname,dirnames
+        for root, dirs, files in os.walk('FBXs'):
+            for file_name in files:
+                generate_svg("/FBXs/" + file_name)
+                s.wfile.write("<object class='thumbnail' width='150px' height='150px' data=\"SVGs/" + file_name[:-3] + "svg\" type=\"image/svg+xml\"></object>")
 
         s.wfile.write("</body></html>")
 '''
@@ -54,13 +58,15 @@ def generate_svg(fbx_path):
 
         svg_content += write_functions()
 
-    svg_content += "]]>\n</script>\n"
+        svg_content += "]]>\n</script>\n"
 
-    svg_content += write_paths(mesh)
+        svg_content += write_paths(mesh)
 
-    svg_content += "\n</svg>"
+        svg_content += "\n</svg>"
     
-    svg_file = open("box_wire.svg", "w")
+    svg_file_name = "SVGs" + fbx_path[4:][:-3] + "svg"
+    svg_file = open(svg_file_name, "w")
+    print(svg_file_name)
     svg_file.write(svg_content)
     svg_file.close()
 
@@ -154,14 +160,18 @@ def write_functions():
 
 def write_paths(mesh):
     paths = ""
-    start_colour = 0x002BFF
+    fbx_colour = FbxCommon.FbxPropertyDouble3(mesh.FindProperty("Color")).Get()
     for i in range(mesh.GetPolygonCount()):
-        paths += "\n<path fill='#00" + format(start_colour, 'x') + "' id='face-" + str(i) + "' d=''/>"
-        start_colour += 1
+        r = format(int(fbx_colour[0] * 255), '02x')
+        g = format(int(fbx_colour[1] * 255), '02x')
+        b = format(int(fbx_colour[2] * 255), '02x')
+        rgb = r + g + b
+        paths += "\n<path stroke='#" + rgb + "' fill='#" + rgb + "' id='face-" + str(i) + "' d=''/>"
+
     return paths
 
-httpd = BaseHTTPServer.HttpServer(("localhost", 8000), MyHandler)
-httpd.serve_forever()
+#httpd = BaseHTTPServer.HTTPServer(("localhost", 8000), MyHandler)
+#httpd.serve_forever()
 
-#generate_svg("cube.fbx")
-generate_svg("teapot.fbx")
+generate_svg("FBXs/cube.fbx")
+#generate_svg("teapot.fbx")

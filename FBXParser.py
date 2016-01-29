@@ -1,5 +1,6 @@
 import time
 import os
+import math
 import BaseHTTPServer
 import FbxCommon
 
@@ -160,13 +161,14 @@ def write_functions():
 
 def write_paths(mesh):
     paths = ""
-    fbx_colour = FbxCommon.FbxPropertyDouble3(mesh.FindProperty("Color")).Get()
-    for i in range(mesh.GetPolygonCount()):
-        r = format(int(fbx_colour[0] * 255), '02x')
-        g = format(int(fbx_colour[1] * 255), '02x')
-        b = format(int(fbx_colour[2] * 255), '02x')
-        rgb = r + g + b
-        paths += "\n<path stroke='#" + rgb + "' fill='#" + rgb + "' id='face-" + str(i) + "' d=''/>"
+    polygons = mesh.GetPolygonCount()
+    colour = FbxCommon.FbxPropertyDouble3(mesh.FindProperty("Color")).Get()
+    for i in range(polygons):
+        r = max(0, min(colour[0] * 255 - colour[0] * 0.4 * ((i + 0.0) / polygons * 255), 255))
+        g = max(0, min(colour[1] * 255 - colour[1] * 0.4 * ((i + 0.0) / polygons * 255), 255))
+        b = max(0, min(colour[2] * 255 - colour[2] * 0.4 * ((i + 0.0) / polygons * 255), 255))
+        rgb = "%02x" %r + "%02x" %g + "%02x" %b
+        paths += "\n<path stroke-width='0.2' fill='#" + str(rgb) + "' id='face-" + str(i) + "' d=''/>"
 
     return paths
 
@@ -174,4 +176,4 @@ def write_paths(mesh):
 #httpd.serve_forever()
 
 generate_svg("FBXs/cube.fbx")
-#generate_svg("teapot.fbx")
+generate_svg("FBXs/teapot.fbx")

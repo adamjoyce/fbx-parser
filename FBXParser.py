@@ -23,11 +23,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         s.wfile.write("<html><head><title>FBX Parser</title></head>")
         s.wfile.write("<style type='text/css'>object\n{\nborder : 1px inset lightgray;\n}\n.thumbnail\n{\nmargin-right:10px;\nmargin-bottom:10px;\n}\n</style></head>")   
         s.wfile.write("<body>")
-
-        #for file_name in os.listdir('./FBXs'):
-            #if os.path.isfile(file_name):
-                #generate_svg("/FBXs/" + file_name)
-                #s.wfile.write("<object class='thumbnail' width='150px' height='150px' data=\"SVGs/" + file_name[:-3] + "svg\" type=\"image/svg+xml\"/>")
         
         for root, dirs, files in os.walk('FBXs'):
             for file_name in files:
@@ -35,20 +30,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                s.wfile.write("<object class='thumbnail' width='150px' height='150px' data=\"SVGs/" + file_name[:-3] + "svg\" type=\"image/svg+xml\"></object>")
 
         s.wfile.write("</body></html>")
-'''
-def display(node, indent):
-    if not node: return
-
-    print("%s%s" % (indent, node.GetNodeAttribute()))
-    for i in range(node.GetChildCount()):
-        child = node.GetChild(i)
-        attr_type = child.GetNodeAttribute().GetAttributeType()
-
-        if attr_type == FbxCommon.FbxNodeAttribute.eMesh:
-            print(child)
-            
-        display(child, indent + "  ")
-'''
 
 def generate_svg(fbx_path):
     sdk_manager, scene = FbxCommon.InitializeSdkObjects()
@@ -161,7 +142,7 @@ def write_centres(smallest_control_points):
     return centre_x + centre_y + centre_z
 
 def write_functions():
-    init_function = "function init(evt)\n{\n\tif(window.svgDocument == null)\n\t{\n\t\tsvgDocument = evt.target.ownerDocument;\n\t}\n\n\trotate_round_x(0.78);\n\trotate_round_y(0.78);\n\n\tdetermine_depth()\n\tdraw_object();\n\tset_viewport();\n}\n\n"
+    init_function = "function init(evt)\n{\n\tif(window.svgDocument == null)\n\t{\n\t\tsvgDocument = evt.target.ownerDocument;\n\t}\n\n\trotate_round_x(-0.78);\n\trotate_round_y(-0.78);\n\n\tdetermine_depth()\n\tdraw_object();\n\tset_viewport();\n}\n\n"
 
     draw_object = "function draw_object()\n{\n\tfor(var i = 0; i < faces.length; i++)\n\t{\n\t\tface = svgDocument.getElementById('face-'+i);\n\t\tvar d = 'M' + x_coordinates[faces[depth[i]][0]] + ' ' + y_coordinates[faces[depth[i]][0]];\n\t\tfor(var j = 1; j < faces[depth[i]].length; j++)\n\t\t{\n\t\t\td += ' ' + 'L' + x_coordinates[faces[depth[i]][j]] + ' ' + y_coordinates[faces[depth[i]][j]];\n\t\t}\n\t\td += ' Z';\n\t\tface.setAttributeNS(null, 'd', d);\n\t}\n}\n\n"
 
@@ -180,11 +161,11 @@ def write_paths(mesh):
     polygons = mesh.GetPolygonCount()
     colour = FbxCommon.FbxPropertyDouble3(mesh.FindProperty("Color")).Get()
     for i in range(polygons):
-        r = max(0, min(colour[0] * 255 - colour[0] * 0.4 * ((i + 0.0) / polygons * 255), 255))
-        g = max(0, min(colour[1] * 255 - colour[1] * 0.4 * ((i + 0.0) / polygons * 255), 255))
-        b = max(0, min(colour[2] * 255 - colour[2] * 0.4 * ((i + 0.0) / polygons * 255), 255))
+        r = max(0, min(colour[0] * 255 - colour[0] * 0.5 * (float(i) / polygons * 255), 255))
+        g = max(0, min(colour[1] * 255 - colour[1] * 0.5 * (float(i) / polygons * 255), 255))
+        b = max(0, min(colour[2] * 255 - colour[2] * 0.5 * (float(i) / polygons * 255), 255))
         rgb = "%02x" %r + "%02x" %g + "%02x" %b
-        paths += "\n<path stroke-width='0.2' fill='#" + str(rgb) + "' id='face-" + str(i) + "' d=''/>"
+        paths += "\n<path stroke='#" + str(rgb) + "' fill='#" + str(rgb) + "' id='face-" + str(i) + "' d=''/>"
 
     return paths
 

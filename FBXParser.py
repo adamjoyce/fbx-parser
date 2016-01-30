@@ -6,17 +6,33 @@ import FbxCommon
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(s):
+
+        if s.path.endswith(".svg"):
+            f=open(os.getcwd() + s.path)
+            s.send_response(200)
+            s.send_header('Content-type', 'image/svg+xml')
+            s.end_headers()
+            s.wfile.write(f.read())
+            f.close()
+            return
+
         """Respond to a GET request."""
         s.send_response(200)
         s.send_header("Content-type", "text/html")
         s.end_headers()
         s.wfile.write("<html><head><title>FBX Parser</title></head>")
+        s.wfile.write("<style type='text/css'>object\n{\nborder : 1px inset lightgray;\n}\n.thumbnail\n{\nmargin-right:10px;\nmargin-bottom:10px;\n}\n</style></head>")   
         s.wfile.write("<body>")
 
+        #for file_name in os.listdir('./FBXs'):
+            #if os.path.isfile(file_name):
+                #generate_svg("/FBXs/" + file_name)
+                #s.wfile.write("<object class='thumbnail' width='150px' height='150px' data=\"SVGs/" + file_name[:-3] + "svg\" type=\"image/svg+xml\"/>")
+        
         for root, dirs, files in os.walk('FBXs'):
             for file_name in files:
-                generate_svg("/FBXs/" + file_name)
-                s.wfile.write("<object class='thumbnail' width='150px' height='150px' data=\"SVGs/" + file_name[:-3] + "svg\" type=\"image/svg+xml\"></object>")
+               generate_svg("/FBXs/" + file_name)
+               s.wfile.write("<object class='thumbnail' width='150px' height='150px' data=\"SVGs/" + file_name[:-3] + "svg\" type=\"image/svg+xml\"></object>")
 
         s.wfile.write("</body></html>")
 '''
@@ -65,7 +81,7 @@ def generate_svg(fbx_path):
 
         svg_content += "\n</svg>"
     
-    svg_file_name = "SVGs" + fbx_path[4:][:-3] + "svg"
+    svg_file_name = "SVG" + fbx_path[4:][:-3] + "svg"
     svg_file = open(svg_file_name, "w")
     print(svg_file_name)
     svg_file.write(svg_content)
@@ -172,8 +188,8 @@ def write_paths(mesh):
 
     return paths
 
-#httpd = BaseHTTPServer.HTTPServer(("localhost", 8000), MyHandler)
-#httpd.serve_forever()
+httpd = BaseHTTPServer.HTTPServer(("localhost", 8000), MyHandler)
+httpd.serve_forever()
 
-generate_svg("FBXs/cube.fbx")
-generate_svg("FBXs/teapot.fbx")
+#generate_svg("FBXs/cube.fbx")
+#generate_svg("FBXs/teapot.fbx")

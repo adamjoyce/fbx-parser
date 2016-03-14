@@ -21,7 +21,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         s.send_header("Content-type", "text/html")
         s.end_headers()
         s.wfile.write("<html><head><title>FBX Parser</title></head>")
-        s.wfile.write("<style type='text/css'>object\n{\nborder : 1px inset lightgray;\n}\n.thumbnail\n{\nmargin-right:10px;\nmargin-bottom:10px;\n}\n</style></head>")   
+        s.wfile.write("<style type='text/css'>object\n{\nborder : 1px inset black;\n}\n.thumbnail\n{\nmargin-right:10px;\nmargin-bottom:10px;\n}\n</style></head>")   
         s.wfile.write("<body>")
         
         for root, dirs, files in os.walk('FBXs'):
@@ -44,7 +44,7 @@ def generate_svg(fbx_path):
         child = node.GetChild(i)
         mesh = child.GetMesh()
 
-        svg_content += write_edges(mesh)
+        #svg_content += write_edges(mesh)
         svg_content += write_faces(mesh)
         svg_content += write_depth(mesh)
         
@@ -171,6 +171,3 @@ def write_paths(mesh):
 
 httpd = BaseHTTPServer.HTTPServer(("localhost", 8000), MyHandler)
 httpd.serve_forever()
-
-#generate_svg("FBXs/cube.fbx")
-#generate_svg("FBXs/teapot.fbx")
